@@ -1,0 +1,14 @@
+[package]
+name = "ProofVault"
+version = "1.0.0"
+authors = []
+
+[addresses]
+proof_vault = "_"
+
+[dev-addresses]
+proof_vault = "0x123"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "mainnet" }
+AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib", rev = "mainnet" }
