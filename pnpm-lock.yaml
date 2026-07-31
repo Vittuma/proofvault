@@ -14,9 +14,15 @@ importers:
       '@aptos-labs/wallet-adapter-react':
         specifier: ^8.3.3
         version: 8.3.3(@aptos-labs/ts-sdk@7.2.0)(@telegram-apps/bridge@1.9.2)(@types/react@19.2.17)(@wallet-standard/core@1.1.2)(debug@4.4.3(supports-color@7.2.0))(react@19.2.4)(supports-color@7.2.0)
+      '@shelby-protocol/react':
+        specifier: ^2.0.1
+        version: 2.0.1(@aptos-labs/ts-sdk@7.2.0)(@aptos-labs/wallet-adapter-react@8.3.3(@aptos-labs/ts-sdk@7.2.0)(@telegram-apps/bridge@1.9.2)(@types/react@19.2.17)(@wallet-standard/core@1.1.2)(debug@4.4.3(supports-color@7.2.0))(react@19.2.4)(supports-color@7.2.0))(@shelby-protocol/sdk@0.3.1(@aptos-labs/ts-sdk@7.2.0))(@tanstack/react-query@5.101.4(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
       '@shelby-protocol/sdk':
         specifier: ^0.3.1
         version: 0.3.1(@aptos-labs/ts-sdk@7.2.0)
+      '@tanstack/react-query':
+        specifier: ^5.101.4
+        version: 5.101.4(react@19.2.4)
       lucide-react:
         specifier: ^1.27.0
         version: 1.27.0(react@19.2.4)
@@ -688,6 +694,20 @@ packages:
   '@shelby-protocol/clay-codes@0.0.2':
     resolution: {integrity: sha512-kvh59DNO84NjDM/TEJwWmTsrJi859wLEmAMuIa8xM417/qPgi+gjkg4UweUu2LDXdkt4kDnJdreB7ziyJJpglw==}
 
+  '@shelby-protocol/react@2.0.1':
+    resolution: {integrity: sha512-URueUmB5s40IefB3PPndpkD/1QShFfIC4z4BBh06tg8ILvEtsQfWlNNMRNufh6haWJyiZ7xbis5k4fvIqXY5Zw==}
+    peerDependencies:
+      '@aptos-labs/ts-sdk': ^5.2.1 || ^6.0.0
+      '@aptos-labs/wallet-adapter-react': ^6.0.0 || ^7.0.0
+      '@shelby-protocol/sdk': 0.3.1
+      '@tanstack/react-query': '>=5.0.0'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      '@aptos-labs/wallet-adapter-react':
+        optional: true
+
   '@shelby-protocol/reed-solomon@0.0.1':
     resolution: {integrity: sha512-Li+7Uj2LLe247YppsZDbZdnyhxGAmTBOx14QPvLNJzeq1lCmjeV7X2BtRzlvyElsvymQQI/WWcKIHu21ysCR9g==}
 
@@ -797,6 +817,14 @@ packages:
 
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
+
+  '@tanstack/query-core@5.101.4':
+    resolution: {integrity: sha512-gNwcvOJcRbLWPOLG/2OBm+zM+Yv+MKsXKEOWC57USuZDEsI71hEErQsiEGx5wX9rzWWkfwM0fVSPoiIFSsxfiw==}
+
+  '@tanstack/react-query@5.101.4':
+    resolution: {integrity: sha512-yRg2pfOCxIs4ZJW3XYYHU/WgtD04FHSnfHlpRT7h7pR77hwkdRG4wxbKe4aq6P0RvXUTBSQpQeadS1SUYUe+KA==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@telegram-apps/bridge@1.9.2':
     resolution: {integrity: sha512-SJLcNWLXhbbZr9MiqFH/g2ceuitSJKMxUIZysK4zUNyTUNuonrQG80Q/yrO+XiNbKUj8WdDNM86NBARhuyyinQ==}
@@ -2165,6 +2193,10 @@ packages:
     resolution: {integrity: sha512-i8PyM2JnsNChVSYWLr2BAjNoLi0BAYC+wecOnZnVV+YSNJkzP7cWmvI34dk0WArWfH9KwBHNoZI3P3MppImlIA==}
     engines: {node: '>=20'}
 
+  p-limit@7.3.1:
+    resolution: {integrity: sha512-0trZaiG7Y7kN/Egy9a8j47t9osC0Tch4PaIWd9yGF6bvmlk7muExRvGNYb8sXBwEKMoNKsbNN9P8EefuQekE4Q==}
+    engines: {node: '>=20'}
+
   p-locate@5.0.0:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
@@ -3261,6 +3293,18 @@ snapshots:
 
   '@shelby-protocol/clay-codes@0.0.2': {}
 
+  '@shelby-protocol/react@2.0.1(@aptos-labs/ts-sdk@7.2.0)(@aptos-labs/wallet-adapter-react@8.3.3(@aptos-labs/ts-sdk@7.2.0)(@telegram-apps/bridge@1.9.2)(@types/react@19.2.17)(@wallet-standard/core@1.1.2)(debug@4.4.3(supports-color@7.2.0))(react@19.2.4)(supports-color@7.2.0))(@shelby-protocol/sdk@0.3.1(@aptos-labs/ts-sdk@7.2.0))(@tanstack/react-query@5.101.4(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)':
+    dependencies:
+      '@aptos-labs/ts-sdk': 7.2.0
+      '@shelby-protocol/sdk': 0.3.1(@aptos-labs/ts-sdk@7.2.0)
+      '@tanstack/react-query': 5.101.4(react@19.2.4)
+      p-limit: 7.3.1
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      typescript: 5.9.3
+    optionalDependencies:
+      '@aptos-labs/wallet-adapter-react': 8.3.3(@aptos-labs/ts-sdk@7.2.0)(@telegram-apps/bridge@1.9.2)(@types/react@19.2.17)(@wallet-standard/core@1.1.2)(debug@4.4.3(supports-color@7.2.0))(react@19.2.4)(supports-color@7.2.0)
+
   '@shelby-protocol/reed-solomon@0.0.1': {}
 
   '@shelby-protocol/sdk@0.3.1(@aptos-labs/ts-sdk@7.2.0)':
@@ -3350,6 +3394,13 @@ snapshots:
       '@tailwindcss/oxide': 4.3.3
       postcss: 8.5.25
       tailwindcss: 4.3.3
+
+  '@tanstack/query-core@5.101.4': {}
+
+  '@tanstack/react-query@5.101.4(react@19.2.4)':
+    dependencies:
+      '@tanstack/query-core': 5.101.4
+      react: 19.2.4
 
   '@telegram-apps/bridge@1.9.2':
     dependencies:
@@ -4870,6 +4921,10 @@ snapshots:
       yocto-queue: 0.1.0
 
   p-limit@7.1.1:
+    dependencies:
+      yocto-queue: 1.2.2
+
+  p-limit@7.3.1:
     dependencies:
       yocto-queue: 1.2.2
 

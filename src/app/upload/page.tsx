@@ -2,15 +2,17 @@
 
 import { useState } from 'react';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
-import { uploadToShelby } from '@/lib/shelby/upload';
+import { useShelbyUpload } from '@/lib/shelby/upload';
 import { calculateFileHash } from '@/lib/hashing/sha256';
 import { buildRegisterEvidencePayload } from '@/lib/aptos/transactions';
-import { MODULE_ADDRESS, aptosClient, isValidContractAddress } from '@/lib/aptos/client';
+import { buildShelbyExplorerUrl } from '@/lib/shelby/explorer';
+import { MODULE_ADDRESS, aptosClient, isValidContractAddress, checkWalletBalances } from '@/lib/aptos/client';
 import { Loader2, UploadCloud, CheckCircle2, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 
 export default function UploadPage() {
   const { connected, account, signAndSubmitTransaction } = useWallet();
+  const { upload } = useShelbyUpload();
   
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
@@ -27,6 +29,12 @@ export default function UploadPage() {
   const [blobId, setBlobId] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<boolean | null>(null);
+
+  const storageMode = (process.env.NEXT_PUBLIC_STORAGE_ADAPTER_MODE as 'local' | 'shelby') || 'shelby';
+  const rawKey = process.env.NEXT_PUBLIC_SHELBY_API_KEY;
+  const isAnonymous = storageMode === 'shelby' && (!rawKey || rawKey === 'your_api_key_here');
 
   const categories = [
     'Document', 'Dataset', 'Research', 
@@ -59,6 +67,14 @@ export default function UploadPage() {
       return;
     }
 
+    if (storageMode === 'shelby') {
+      const balances = await checkWalletBalances(account.address.toString());
+      if (balances.apt === 0 || balances.shelbyUsd === 0) {
+        setErrorMessage('Insufficient balance. You need both APT and ShelbyUSD on Testnet to upload to Shelby.');
+        return;
+      }
+    }
+
     if (!isValidContractAddress(MODULE_ADDRESS)) {
       setErrorMessage('Contract chưa được deploy hoặc địa chỉ chưa được cấu hình đúng trong .env.local');
       return;
@@ -72,12 +88,13 @@ export default function UploadPage() {
       const fileHash = await calculateFileHash(file);
       setHash(fileHash);
 
-      // Step 2: Upload to Shelby
-      setStatus('uploading');
+      // Step 2: Register & Upload to Shelby
       let currentBlobId = blobId; // Recover from previous failed on-chain attempt
       
       if (!currentBlobId) {
-        const uploadResult = await uploadToShelby(file);
+        setStatus('uploading'); 
+        // The upload hook handles L1 registration and RPC upload internally via useUploadBlobs
+        const uploadResult = await upload(file);
         currentBlobId = uploadResult.blobId;
         setBlobId(currentBlobId);
       }
@@ -120,6 +137,35 @@ export default function UploadPage() {
     await handleSubmit(new Event('submit') as unknown as React.FormEvent);
   };
 
+  const handleVerify = async () => {
+    if (!blobId || !hash) return;
+    try {
+      setIsVerifying(true);
+      setVerifyResult(null);
+      const { downloadFromShelby } = await import('@/lib/shelby/download');
+      
+      let accountAddr = '';
+      let blobName = blobId;
+      if (blobId.includes('/')) {
+        const parts = blobId.split('/');
+        accountAddr = parts[0];
+        blobName = parts.slice(1).join('/');
+      } else {
+        accountAddr = account?.address?.toString() || '';
+      }
+
+      const downloadedBlob = await downloadFromShelby(accountAddr, blobName);
+      const downloadedFile = new File([downloadedBlob], 'downloaded', { type: downloadedBlob.type });
+      const downloadedHash = await calculateFileHash(downloadedFile);
+      setVerifyResult(downloadedHash === hash);
+    } catch (err) {
+      console.error(err);
+      setVerifyResult(false);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   if (!connected) {
     return (
       <div className="flex flex-col items-center justify-center py-32 px-4">
@@ -151,7 +197,30 @@ export default function UploadPage() {
           <div>
             <span className="text-slate-500 text-sm block">Shelby Blob ID</span>
             <span className="text-slate-300 font-mono text-sm break-all">{blobId}</span>
+            {storageMode === 'shelby' && blobId && (
+              blobId.includes('/') ? (
+                <a href={buildShelbyExplorerUrl(blobId.split('/')[0], blobId.split('/').slice(1).join('/'), 'testnet')} target="_blank" rel="noopener noreferrer" className="text-cyan-400 text-xs mt-1 inline-block hover:underline">
+                  View on Shelby Explorer ↗
+                </a>
+              ) : (
+                <span className="text-slate-500 text-xs italic mt-1 inline-block">Explorer link unavailable</span>
+              )
+            )}
           </div>
+        </div>
+
+        <div className="bg-slate-900 rounded-lg p-4 text-left space-y-3 mb-8 border border-slate-800">
+           <h3 className="font-semibold text-white">Verify Upload</h3>
+           <p className="text-sm text-slate-400">Download the file directly from Shelby and verify its SHA-256 hash against the blockchain record.</p>
+           <button 
+             onClick={handleVerify}
+             disabled={isVerifying}
+             className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-md text-sm border border-slate-700 disabled:opacity-50"
+           >
+             {isVerifying ? 'Verifying...' : 'Download & Verify'}
+           </button>
+           {verifyResult === true && <p className="text-green-400 text-sm mt-2 flex items-center gap-1"><CheckCircle2 size={16} /> Hash matches perfectly!</p>}
+           {verifyResult === false && <p className="text-red-400 text-sm mt-2 flex items-center gap-1"><ShieldAlert size={16} /> Verification failed!</p>}
         </div>
 
         <div className="flex justify-center gap-4">
@@ -169,7 +238,24 @@ export default function UploadPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 w-full">
       <h1 className="text-3xl font-bold mb-2">Upload Evidence</h1>
-      <p className="text-slate-400 mb-8">Store data on Shelby and verify it permanently on Aptos.</p>
+      <p className="text-slate-400 mb-6">Store data on Shelby and verify it permanently on Aptos.</p>
+      
+      <div className="mb-6 flex gap-3">
+        {storageMode === 'local' ? (
+           <span className="px-3 py-1 bg-yellow-900/50 text-yellow-400 rounded-full text-sm font-medium border border-yellow-700/50">Local Development Mode</span>
+        ) : isAnonymous ? (
+           <span className="px-3 py-1 bg-blue-900/50 text-blue-400 rounded-full text-sm font-medium border border-blue-700/50">Shelby Testnet (Anonymous)</span>
+        ) : (
+           <span className="px-3 py-1 bg-green-900/50 text-green-400 rounded-full text-sm font-medium border border-green-700/50">Shelby Testnet (Authenticated)</span>
+        )}
+      </div>
+
+      {isAnonymous && (
+        <div className="mb-8 p-4 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-300 text-sm">
+          <strong className="text-white">Tip:</strong> You are currently using Shelby in anonymous mode, which has strict rate limits. 
+          To get an API key, use the <a href="https://geomi.shelby.io" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">Geomi Agent</a> and say <em>&quot;Create a client API key for my project&quot;</em>. Then add it as <code className="text-cyan-300 bg-black/30 px-1 py-0.5 rounded">NEXT_PUBLIC_SHELBY_API_KEY</code> in your <code className="text-cyan-300 bg-black/30 px-1 py-0.5 rounded">.env.local</code>.
+        </div>
+      )}
       
       {!isValidContractAddress(MODULE_ADDRESS) && (
         <div className="mb-8 p-4 bg-red-900/40 border border-red-500/50 rounded-lg text-red-200 flex items-start gap-3">
@@ -300,7 +386,7 @@ export default function UploadPage() {
                 
                 <div className="flex items-center justify-between">
                   <span className={status === 'uploading' ? 'text-cyan-400 font-medium' : 'text-slate-400'}>
-                    2. {process.env.NEXT_PUBLIC_SHELBY_API_KEY ? 'Uploading to Shelby' : 'Saving to Local Development Storage'}
+                    2. {storageMode === 'shelby' ? 'Registering and uploading to Shelby' : 'Saving to Local Development Storage'}
                   </span>
                   {status === 'registering' && <CheckCircle2 size={16} className="text-green-500" />}
                   {status === 'uploading' && <Loader2 size={16} className="animate-spin text-cyan-500" />}
@@ -308,8 +394,7 @@ export default function UploadPage() {
                 {blobId && <div className="pl-4 text-xs font-mono text-slate-500 truncate">{blobId}</div>}
                 
                 <div className="flex items-center justify-between">
-                  <span className={status === 'registering' ? 'text-cyan-400 font-medium' : 'text-slate-400'}>3. Registering on Aptos</span>
-                  {/* status === 'success' is never reached here due to early return */}
+                  <span className={status === 'registering' ? 'text-cyan-400 font-medium' : 'text-slate-400'}>3. Registering evidence on ProofVault</span>
                   {status === 'registering' && <Loader2 size={16} className="animate-spin text-cyan-500" />}
                 </div>
               </div>

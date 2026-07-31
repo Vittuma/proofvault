@@ -6,6 +6,7 @@ import { getEvidenceById } from '@/lib/aptos/views';
 import { EvidenceRecord } from '@/lib/aptos/types';
 import { MODULE_ADDRESS } from '@/lib/aptos/client';
 import { downloadFromShelby } from '@/lib/shelby/download';
+import { buildShelbyExplorerUrl } from '@/lib/shelby/explorer';
 import { VerificationComponent } from '@/components/verification/VerificationComponent';
 import { Loader2, Download, Copy, ShieldAlert, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -37,7 +38,14 @@ export default function EvidenceDetail() {
     if (!evidence) return;
     setDownloading(true);
     try {
-      const blob = await downloadFromShelby(evidence.blob_identifier);
+      let accountAddr = '';
+      let blobName = evidence.blob_identifier;
+      if (evidence.blob_identifier.includes('/')) {
+        const parts = evidence.blob_identifier.split('/');
+        accountAddr = parts[0];
+        blobName = parts.slice(1).join('/');
+      }
+      const blob = await downloadFromShelby(accountAddr, blobName);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -116,9 +124,18 @@ export default function EvidenceDetail() {
             
             <div>
               <span className="text-slate-500 block mb-1">Shelby Blob ID</span>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-slate-300 truncate">{evidence.blob_identifier}</span>
-                <button onClick={() => copyToClipboard(evidence.blob_identifier)} className="text-slate-500 hover:text-white"><Copy size={14}/></button>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-slate-300 truncate">{evidence.blob_identifier}</span>
+                  <button onClick={() => copyToClipboard(evidence.blob_identifier)} className="text-slate-500 hover:text-white"><Copy size={14}/></button>
+                </div>
+                {evidence.blob_identifier.includes('/') ? (
+                  <a href={buildShelbyExplorerUrl(evidence.blob_identifier.split('/')[0], evidence.blob_identifier.split('/').slice(1).join('/'), 'testnet')} target="_blank" rel="noopener noreferrer" className="text-cyan-400 text-xs hover:underline">
+                    View on Shelby Explorer ↗
+                  </a>
+                ) : (
+                  <span className="text-slate-500 text-xs italic">Explorer link unavailable</span>
+                )}
               </div>
             </div>
 
