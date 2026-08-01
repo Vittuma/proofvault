@@ -1,45 +1,35 @@
-## Project name
-ProofVault
+# ProofVault: Verifiable AI Auditor & File Storage
 
-## One-line description
-A verifiable file integrity and storage platform, using Shelby for high-speed storage and Aptos for publisher attribution and file-integrity commitments.
+ProofVault gives AI agents verifiable memory by storing every source file, report, and execution manifest on Shelby and committing their integrity hashes on Aptos.
 
-## Problem
-In a digital world, verifying the authenticity of documents, media, and datasets is difficult. When sharing important files online, it is challenging to prove that the file was not altered after it was published.
+ProofVault is not just an upload demo. It is a fully functional verifiable storage and AI audit platform. By combining Shelby's decentralized storage network with the Aptos blockchain, we provide a robust ecosystem where both raw data and AI-generated insights are permanently anchored and verifiable.
 
-## Solution
-ProofVault stores files through Shelby and registers their publisher, timestamp, storage reference, and integrity hash on Aptos.
+## Use Cases
 
-## Why Shelby
-ProofVault requires:
-- Fast file uploads
-- Fast public retrieval
-- High read volume
-- Persistent datasets
-- Support for CSV, JSON, images, text, and PDF
-- A path from MVP usage to real production workloads
+- **Document Audit**: Automatically review contracts and financial statements with AI, while maintaining a mathematically verifiable trail of the original documents.
+- **Research Review**: Summarize extensive datasets and research papers with AI findings that are citation-verified against the exact source text.
+- **Release Artifacts**: Store software releases or public datasets and attach AI compliance audits.
+- **Compliance Evidence**: Maintain untamperable records of compliance documents along with AI-generated consistency checks.
+- **AI Agent Memory**: Provide AI agents with a verifiable, untamperable memory layer.
+- **Machine-Readable Archives**: Expose structured JSON reports and execution manifests for automated downstream consumption.
 
-## Expected initial workload
-- 10–20 initial organizations/users
-- 20–50 GB initial storage
-- CSV, JSON, PNG, JPG, TXT, and PDF
-- 5,000–20,000 monthly retrievals
-- Public verifiable document timelines
-- Future machine-readable datasets for AI agents
+## Why Shelby + Aptos?
 
-## Current MVP
-- Fully functioning Aptos Move smart contract deployed to Testnet.
-- Browser-based file hashing (SHA-256) via Web Crypto API.
-- Integrated official Shelby SDK for decentralized hot storage.
-- Searchable on-chain evidence archive.
-- Local verification tool comparing downloaded files to on-chain hashes.
+- **Shelby** serves as the storage and verifiable memory layer. Original source files, AI structured reports (`audit-report.json`), and execution histories (`agent-run-manifest.json`) are all stored on Shelby.
+- **Aptos** provides the immutable registry. Every file on Shelby is anchored on Aptos with its SHA-256 hash, publisher, and timestamp. Agent histories can be fully recovered from the Shelby + Aptos combination without relying on centralized databases.
 
-## Roadmap
-- Encrypted private files
-- Team workspaces
-- Dataset versioning
-- Public API
-- AI agent access
-- Category-specific public feeds
-- Document signing
-- Reviewer attestations
+## AI Citation Verification & Hallucination Prevention
+
+A core feature of ProofVault is its defense against AI hallucinations:
+- All AI findings are returned as structured data and validated against a strict JSON schema.
+- Every citation is verified against the exact extracted source text. 
+- Unsupported citations are stripped out. Any finding that loses all of its citations is also removed.
+- This creates a high-trust environment where AI-generated reports are grounded in reality.
+
+## Real Workload
+
+ProofVault exercises a real, intensive workload across the stack:
+- Source uploads and Aptos registrations.
+- Report uploads and manifest uploads to Shelby.
+- Downloads, text extractions, and SHA-256 re-verifications.
+- Chain synchronization and cache recovery.
