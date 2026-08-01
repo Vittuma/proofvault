@@ -47,11 +47,16 @@ export interface AgentRunManifest {
   requestedBy: string;
   model: string;
   promptVersion: string;
+  sourceEvidenceIds: string[];
+  reportEvidenceId: string;
+  manifestBlobId: string;
+  reportBlobId: string;
+  aptosTransactionHash: string;
   sourceFiles: Omit<SourceFile, 'content' | 'mimeType'>[];
   reportFiles: {
     json: string;
-    markdown: string;
+    markdown?: string;
   };
   reportSha256: string;
-  status: 'completed' | 'failed';
+  status: 'completed' | 'failed' | 'manifest_pending';
 }

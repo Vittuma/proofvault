@@ -73,3 +73,12 @@ export const getAllEvidence = async (registryAddress: string): Promise<EvidenceR
   // Return in descending order (newest first)
   return records.reverse();
 };
+
+export const getAllEvidencePaginated = async (registryAddress: string, startId: number, limit: number): Promise<EvidenceRecord[]> => {
+  const records: EvidenceRecord[] = [];
+  for (let i = startId; i > 0 && records.length < limit; i--) {
+    const record = await getEvidenceById(registryAddress, i);
+    if (record) records.push(record);
+  }
+  return records;
+};

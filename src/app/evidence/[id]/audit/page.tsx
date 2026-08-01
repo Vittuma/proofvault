@@ -8,14 +8,16 @@ import { MODULE_ADDRESS } from '@/lib/aptos/client';
 import { Loader2, ArrowLeft, Bot, AlertTriangle, FileText, CheckCircle2, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useShelbyUpload } from '@/lib/shelby/upload';
-import { buildRegisterEvidencePayload } from '@/lib/aptos/transactions';
+import { getStorageMode } from '@/lib/shelby/client';
+import { buildRegisterEvidencePayload, extractEvidenceIdFromReceipt } from '@/lib/aptos/transactions';
 import { aptosClient } from '@/lib/aptos/client';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
-import { AuditReport, AnalysisType } from '@/lib/ai/types';
+import { AuditReport, AnalysisType, AgentRunManifest } from '@/lib/ai/types';
+import { saveLocalRun } from '@/lib/ai/local-runs';
 
 export default function AuditPage() {
   const { id } = useParams();
-  const { signAndSubmitTransaction } = useWallet();
+  const { signAndSubmitTransaction, account } = useWallet();
   const { upload } = useShelbyUpload();
 
   const [evidence, setEvidence] = useState<EvidenceRecord | null>(null);
@@ -26,6 +28,7 @@ export default function AuditPage() {
   const [report, setReport] = useState<AuditReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
+  const [pendingManifest, setPendingManifest] = useState<AgentRunManifest | null>(null);
 
   useEffect(() => {
     const fetchEvidence = async () => {
@@ -94,25 +97,23 @@ export default function AuditPage() {
     setError(null);
 
     try {
-      const manifest = {
-        runId: report.runId,
-        analysisType: report.analysisType,
-        createdAt: report.createdAt,
-        model: report.model,
-        sourceFiles: report.sourceFiles,
-        status: 'completed'
-      };
-
       const reportFile = new File([JSON.stringify(report, null, 2)], `report-${report.runId}.json`, { type: 'application/json' });
-      const manifestFile = new File([JSON.stringify(manifest, null, 2)], `manifest-${report.runId}.json`, { type: 'application/json' });
-
-      // Upload files
+      
+      // Upload report to Shelby
       const reportRes = await upload(reportFile);
-      const manifestRes = await upload(manifestFile);
       const reportBlobId = reportRes.blobId;
-      const manifestBlobId = manifestRes.blobId;
 
-      // Hash the report
+      // Predict Manifest Blob ID
+      const manifestFileName = `manifest-${report.runId}.json`;
+      const mode = getStorageMode();
+      const accountAddress = account?.address?.toString() || '';
+      
+      // Compute the deterministic ID based on Shelby's format or local mock
+      const predictedManifestBlobId = mode === 'local' 
+        ? `local_blob_${manifestFileName}` 
+        : `${accountAddress}/${manifestFileName}`;
+
+      // Hash the report for Aptos registration
       const hashBuffer = await crypto.subtle.digest('SHA-256', await reportFile.arrayBuffer());
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const sha256Hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -123,7 +124,7 @@ export default function AuditPage() {
         'AI Report', // category
         evidence.project_or_topic, // projectOrTopic
         `AI Report: ${evidence.title}`, // title
-        `Analysis: ${report.analysisType}. Manifest: ${manifestBlobId}`, // description
+        `Analysis: ${report.analysisType}. Manifest: ${predictedManifestBlobId}`, // description
         new Date().toISOString().split('T')[0], // documentDate
         reportBlobId, // blobIdentifier
         `report-${report.runId}.json`, // originalFileName
@@ -134,14 +135,90 @@ export default function AuditPage() {
       );
 
       const response = await signAndSubmitTransaction(payload);
+      const txResult = await aptosClient.waitForTransaction({ transactionHash: response.hash });
+      
+      // Extract the real Evidence ID from the transaction receipt
+      const reportEvidenceId = extractEvidenceIdFromReceipt(txResult) || '0';
+      if (reportEvidenceId === '0') {
+        throw new Error('Failed to extract Evidence ID from transaction receipt. Transaction might have failed.');
+      }
 
-      await aptosClient.waitForTransaction({ transactionHash: response.hash });
-      setStatus('saved');
+      // Create manifest with all required fields
+      const manifest: AgentRunManifest = {
+        runId: report.runId,
+        analysisType: report.analysisType,
+        createdAt: report.createdAt,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        requestedBy: (txResult as any).sender || 'unknown',
+        model: report.model,
+        promptVersion: '1.0',
+        sourceEvidenceIds: [evidence.id],
+        reportEvidenceId: reportEvidenceId,
+        aptosTransactionHash: response.hash,
+        manifestBlobId: predictedManifestBlobId,
+        reportBlobId: reportBlobId,
+        sourceFiles: report.sourceFiles,
+        reportFiles: {
+          json: reportBlobId,
+        },
+        reportSha256: sha256Hex,
+        status: 'completed'
+      };
+
+      // Upload manifest to Shelby
+      try {
+        const manifestFile = new File([JSON.stringify(manifest, null, 2)], manifestFileName, { type: 'application/json' });
+        const manifestRes = await upload(manifestFile);
+        
+        // Verify our prediction was correct
+        if (manifestRes.blobId !== predictedManifestBlobId) {
+          console.warn(`Manifest Blob ID prediction mismatch. Expected ${predictedManifestBlobId}, got ${manifestRes.blobId}`);
+          manifest.manifestBlobId = manifestRes.blobId;
+        }
+
+        // Save to local storage cache
+        saveLocalRun(manifest);
+        setStatus('saved');
+      } catch (uploadError) {
+        console.error('Failed to upload manifest:', uploadError);
+        manifest.status = 'manifest_pending';
+        saveLocalRun(manifest);
+        setPendingManifest(manifest);
+        setError('Aptos transaction succeeded, but manifest upload failed. You can retry the manifest upload below.');
+        setStatus('done');
+      }
 
     } catch (err: unknown) {
       const error = err as Error;
       console.error(error);
       setError(error.message || 'Failed to save report.');
+      setStatus('done');
+    }
+  };
+
+  const handleRetryManifest = async () => {
+    if (!pendingManifest) return;
+    setStatus('saving');
+    setError(null);
+    try {
+      const manifestFileName = `manifest-${pendingManifest.runId}.json`;
+      // Convert status back to completed before uploading
+      const manifestToUpload = { ...pendingManifest, status: 'completed' as const };
+      const manifestFile = new File([JSON.stringify(manifestToUpload, null, 2)], manifestFileName, { type: 'application/json' });
+      const manifestRes = await upload(manifestFile);
+      
+      if (manifestRes.blobId !== pendingManifest.manifestBlobId) {
+        console.warn(`Manifest Blob ID prediction mismatch during retry. Expected ${pendingManifest.manifestBlobId}, got ${manifestRes.blobId}`);
+        manifestToUpload.manifestBlobId = manifestRes.blobId;
+      }
+      
+      saveLocalRun(manifestToUpload);
+      setPendingManifest(null);
+      setStatus('saved');
+    } catch (err) {
+      const error = err as Error;
+      console.error(error);
+      setError('Failed to upload manifest during retry: ' + error.message);
       setStatus('done');
     }
   };
@@ -328,14 +405,25 @@ export default function AuditPage() {
               </div>
             )}
 
-            <button
-              onClick={handleSaveReport}
-              disabled={status === 'saving'}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              <Save size={18} />
-              Save Verified Report
-            </button>
+            {pendingManifest ? (
+              <button
+                onClick={handleRetryManifest}
+                disabled={status === 'saving'}
+                className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Save size={18} />
+                {status === 'saving' ? 'Retrying...' : 'Retry Manifest Upload'}
+              </button>
+            ) : (
+              <button
+                onClick={handleSaveReport}
+                disabled={status === 'saving'}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Save size={18} />
+                Save Verified Report
+              </button>
+            )}
           </div>
         )}
       </div>

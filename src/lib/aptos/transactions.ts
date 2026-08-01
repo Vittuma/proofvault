@@ -39,3 +39,18 @@ export const buildRegisterEvidencePayload = (
     },
   };
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const extractEvidenceIdFromReceipt = (receipt: any): string | null => {
+  if (!receipt || !receipt.events) return null;
+  
+  for (const event of receipt.events) {
+    if (event.type === `${MODULE_ADDRESS}::${MODULE_NAME}::EvidenceRegisteredEvent`) {
+      if (event.data && event.data.id) {
+        return String(event.data.id);
+      }
+    }
+  }
+  return null;
+};
+

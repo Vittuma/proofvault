@@ -31,7 +31,7 @@ export function useShelbyUpload() {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
-            blobId: `local_blob_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+            blobId: `local_blob_${file.name}`,
             blobName: file.name,
             fileName: file.name,
             mimeType: file.type || 'application/octet-stream',
