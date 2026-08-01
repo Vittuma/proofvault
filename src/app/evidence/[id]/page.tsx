@@ -8,7 +8,7 @@ import { MODULE_ADDRESS } from '@/lib/aptos/client';
 import { downloadFromShelby } from '@/lib/shelby/download';
 import { buildShelbyExplorerUrl } from '@/lib/shelby/explorer';
 import { VerificationComponent } from '@/components/verification/VerificationComponent';
-import { Loader2, Download, Copy, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { Loader2, Download, Copy, ShieldAlert, ArrowLeft, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export default function EvidenceDetail() {
@@ -167,7 +167,7 @@ export default function EvidenceDetail() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-800">
+          <div className="pt-6 border-t border-slate-800 flex flex-col gap-3">
             <button
               onClick={handleDownload}
               disabled={downloading}
@@ -176,6 +176,14 @@ export default function EvidenceDetail() {
               {downloading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
               {downloading ? 'Downloading...' : 'Download Original File'}
             </button>
+            
+            <Link 
+              href={`/evidence/${id}/audit`}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors"
+            >
+              <Sparkles size={18} />
+              Analyze with AI
+            </Link>
           </div>
         </div>
 

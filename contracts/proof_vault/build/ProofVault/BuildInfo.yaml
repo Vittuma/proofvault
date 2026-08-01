@@ -8,14 +8,14 @@ compiled_package_info:
     aptos_std: "0000000000000000000000000000000000000000000000000000000000000001"
     aptos_token: "0000000000000000000000000000000000000000000000000000000000000003"
     core_resources: 000000000000000000000000000000000000000000000000000000000a550c18
-    proof_vault: d5da04aa754c2c30d148221ba9709b4bebf36a5dd8ed2ea8d6e5a557fe5926d2
+    proof_vault: "0000000000000000000000000000000000000000000000000000000000000123"
     std: "0000000000000000000000000000000000000000000000000000000000000001"
     vm: "0000000000000000000000000000000000000000000000000000000000000000"
     vm_reserved: "0000000000000000000000000000000000000000000000000000000000000000"
-  source_digest: E10D34FEE28571605E7841DA0B7C5CE5E467AC5891A5239C0AA074DEB9085BC8
+  source_digest: AB89AE43096DBFC260049C3B81E25CA1A099A9DCC732D0F994A9AB4A4D0F3D46
   build_flags:
-    dev_mode: false
-    test_mode: false
+    dev_mode: true
+    test_mode: true
     verify_mode: false
     override_std: ~
     generate_docs: false
@@ -24,8 +24,7 @@ compiled_package_info:
     full_model_generation: true
     install_dir: ~
     force_recompilation: false
-    additional_named_addresses:
-      proof_vault: d5da04aa754c2c30d148221ba9709b4bebf36a5dd8ed2ea8d6e5a557fe5926d2
+    additional_named_addresses: {}
     forced_named_addresses: {}
     fetch_deps_only: false
     skip_fetch_latest_git_deps: false

@@ -30,6 +30,7 @@ export default function RootLayout({
                 <nav className="hidden md:flex gap-6">
                   <Link href="/upload" className="text-sm text-slate-300 hover:text-white transition-colors">Upload Evidence</Link>
                   <Link href="/evidence" className="text-sm text-slate-300 hover:text-white transition-colors">Archive</Link>
+                  <Link href="/agent-runs" className="text-sm text-slate-300 hover:text-white transition-colors">Agent Runs</Link>
                   <Link href="/about" className="text-sm text-slate-300 hover:text-white transition-colors">About</Link>
                 </nav>
               </div>
