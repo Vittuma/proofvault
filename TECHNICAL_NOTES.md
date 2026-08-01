@@ -2,18 +2,21 @@
 
 ## Version Dependencies
 
-- **Shelby SDK**: `0.3.0` (simulated local or testnet mode)
-- **Aptos SDK**: `@aptos-labs/ts-sdk` latest
-- **Aptos Wallet Adapter**: `@aptos-labs/wallet-adapter-react` latest
-- **OpenAI SDK**: `openai` latest
-- **Next.js**: `16.2.x` (App Router)
+- **Shelby SDK**: `@shelby-protocol/sdk ^0.3.1`
+- **Shelby React**: `@shelby-protocol/react ^2.0.1`
+- **Aptos SDK**: `@aptos-labs/ts-sdk ^7.2.0`
+- **Aptos Wallet Adapter**: `@aptos-labs/wallet-adapter-react ^8.3.3`
+- **OpenAI SDK**: `openai ^7.2.0`
+- **Next.js**: `16.2.12`
+- **React**: `19.2.4`
+- **Zod**: `^4.4.3`
 - **Node**: `>= 20.x`
 - **pnpm**: `>= 9.x`
 
 ## Exact Upload & Download APIs
 
-- **Upload**: `upload(file: File)` in `src/lib/shelby/upload.ts`. Handles multipart boundaries internally or local fallback.
-- **Download**: `downloadFromShelby(accountAddress: string, blobName: string)` in `src/lib/shelby/download.ts`. Handles fetching from `explorer.shelby.xyz/api/v1/blobs/download` or local simulation.
+- **Upload**: `upload(file: File)` in `src/lib/shelby/upload.ts`. Handles multipart boundaries to interact with Shelby directly.
+- **Download**: `downloadFromShelby(accountAddress: string, blobName: string)` in `src/lib/shelby/download.ts`. Reads blob objects directly via the Shelby RPC client.
 
 ## Wallet Signing Flow
 

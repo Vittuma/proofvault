@@ -2,15 +2,15 @@
 
 ProofVault gives AI agents verifiable memory by storing every source file, report, and execution manifest on Shelby and committing their integrity hashes on Aptos.
 
-ProofVault is not just an upload demo. It is a fully functional verifiable storage and AI audit platform. By combining Shelby's decentralized storage network with the Aptos blockchain, we provide a robust ecosystem where both raw data and AI-generated insights are permanently anchored and verifiable.
+ProofVault is not just an upload demo. It is a fully functional verifiable storage and AI audit platform. By combining Shelby's decentralized storage network with the Aptos blockchain, we provide a robust ecosystem where both raw data and AI-generated insights are cryptographically anchored and verifiable.
 
 ## Use Cases
 
 - **Document Audit**: Automatically review contracts and financial statements with AI, while maintaining a mathematically verifiable trail of the original documents.
 - **Research Review**: Summarize extensive datasets and research papers with AI findings that are citation-verified against the exact source text.
 - **Release Artifacts**: Store software releases or public datasets and attach AI compliance audits.
-- **Compliance Evidence**: Maintain untamperable records of compliance documents along with AI-generated consistency checks.
-- **AI Agent Memory**: Provide AI agents with a verifiable, untamperable memory layer.
+- **Compliance Evidence**: Maintain tamper-evident records of compliance documents along with AI-generated consistency checks.
+- **AI Agent Memory**: Provide AI agents with a verifiable, tamper-evident memory layer.
 - **Machine-Readable Archives**: Expose structured JSON reports and execution manifests for automated downstream consumption.
 
 ## Why Shelby + Aptos?
