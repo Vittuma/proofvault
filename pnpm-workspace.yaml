@@ -1,0 +1,5 @@
+allowBuilds:
+  esbuild: true
+  workerd: true
+patchedDependencies:
+  http2-wrapper@2.2.1: patches/http2-wrapper@2.2.1.patch

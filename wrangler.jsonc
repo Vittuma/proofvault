@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "proofvault",
+  "account_id": "2ce680ef1cb71099e460efa96b737070",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "NEXT_PUBLIC_APTOS_NETWORK": "testnet",
+    "NEXT_PUBLIC_CONTRACT_ADDRESS": "0x123",
+    "NEXT_PUBLIC_SHELBY_NETWORK": "testnet",
+    "NEXT_PUBLIC_STORAGE_ADAPTER_MODE": "shelby",
+    "NEXT_PUBLIC_SHELBY_API_KEY": "test_shelby_api_key_preview",
+    "NEXT_PUBLIC_MAX_UPLOAD_SIZE": "26214400",
+    "AI_PROVIDER": "openai",
+    "OPENAI_MODEL": "gpt-4o-mini",
+    "AI_MAX_FILES": "5",
+    "AI_MAX_FILE_BYTES": "10485760",
+    "AI_MAX_TOTAL_CHARACTERS": "200000",
+    "AI_PROMPT_VERSION": "v1"
+  }
+}

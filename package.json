@@ -24,6 +24,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.15",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
@@ -34,12 +35,15 @@
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.156.1"
   },
   "pnpm": {
     "approvedBuilds": [
       "sharp",
-      "unrs-resolver"
+      "unrs-resolver",
+      "esbuild",
+      "workerd"
     ]
   }
 }

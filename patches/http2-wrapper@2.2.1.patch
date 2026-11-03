@@ -1,0 +1,20 @@
+diff --git a/source/utils/js-stream-socket.js b/source/utils/js-stream-socket.js
+index ac22280c71190c81c558feeb2fd0764ac41179fa..6028589dcbb92a9a13c8cf68bacbfa08593dd33d 100644
+--- a/source/utils/js-stream-socket.js
++++ b/source/utils/js-stream-socket.js
+@@ -2,7 +2,13 @@
+ const stream = require('stream');
+ const tls = require('tls');
+ 
+-// Really awesome hack.
+-const JSStreamSocket = (new tls.TLSSocket(new stream.PassThrough()))._handle._parentWrap.constructor;
++// Safe fallback for edge runtimes (Cloudflare Workers / workerd) where _handle._parentWrap is not a C++ wrap
++let JSStreamSocket;
++try {
++  const socket = new tls.TLSSocket(new stream.PassThrough());
++  JSStreamSocket = socket._handle && socket._handle._parentWrap ? socket._handle._parentWrap.constructor : class JSStreamSocket extends stream.Duplex {};
++} catch {
++  JSStreamSocket = class JSStreamSocket extends stream.Duplex {};
++}
+ 
+ module.exports = JSStreamSocket;
