@@ -87,3 +87,4 @@ describe('ProofVault End-to-End Simulation & SDK Compatibility', () => {
     expect(mockReport.sourceFiles[0].fileName).toBe('transfer.move');
   });
 });
+
