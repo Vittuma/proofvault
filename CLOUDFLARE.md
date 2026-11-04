@@ -112,3 +112,4 @@ npx wrangler secret put OPENAI_API_KEY
   - Không thay đổi DNS hay domain production khi chưa được phê duyệt.
 - **Quy trình Rollback:**
   - Hệ thống Railway không bị sửa đổi hay tắt. Nếu có bất kỳ vấn đề nào, việc rollback hoàn tất ngay lập tức (**0 phút downtime**).
+
